@@ -16,7 +16,7 @@ int main(void)
   for (i = 0; i < n; i++) {
     for (j = 0; j < n; j++) {
     matA_100[i][j] = ((double)rand()/(double)(RAND_MAX)) * k;
-    matB_100[i][j] = ((double)rand()/(double)(RAND_MAX)) * (k+1);
+    matB_100[i][j] = ((double)rand()/(double)(RAND_MAX)) * k;
     //printf("%f\t", matA_100[i][j]);
     }
     //printf("\n");
@@ -78,7 +78,7 @@ int main(void)
     }
   printf("\n");
   }
-  printf("%Matrix multiplication took %f seconds.\n", cpu_time_used);
+  printf("Matrix multiplication took %f seconds.\n", cpu_time_used);
 
   /*
   printf("\nProduct of matrix multiplication (2nd method) C = A * B:\n");
