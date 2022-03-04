@@ -1,15 +1,14 @@
 program fem2Dheat
   !use csv_file
   implicit none
-  integer(4), parameter     :: nx = 31
-  integer(4)                :: i,j, ny, count
-  real(4)                   :: Lx, Ly, hx, hy, tol, err
-  real(4), dimension(nx)    :: x, y
-  real(4), dimension(nx,nx) :: T, Told
-  REAL(4)                   :: t1, t2, diff
-!  real, dimension(:), allocatable :: err
+  integer(8), parameter     :: nx = 31
+  integer(8)                :: i, j, m, ny, count
+  real(8)                   :: Lx, Ly, hx, hy, tol, err, w
+  real(8), dimension(nx)    :: x, y
+  real(8), dimension(nx,nx) :: T, Told
+  REAL(8)                   :: t1, t2, diff
 
-! Defining the domain and cinvergence criteria
+! Defining the domain and convergence criteria
   Lx = 6.0
   Ly = 4.0
   ny = nx
@@ -23,7 +22,7 @@ program fem2Dheat
     x(i) = 0. + (i-1)*hx
     y(i) = 0. + (i-1)*hy
   end do
-  tol = 1-4
+  tol = 1e-4
   err = 1.0
   count = 0
 
@@ -41,22 +40,59 @@ program fem2Dheat
     T(i, nx) = 300.0
   end do
 
+  print *, 'Input the method of approximation:'
+  print *, '[1] Jacobi method'
+  print *, '[2] Gauss-Seidel method'
+  print *, '[3] SOR method'
+	read *, m
+
 ! The temperature values along the plane
 ! Solved by Gauss-Seidel method
   call CPU_TIME(t1)
-  do while (count <= 1018)
-    Told = T
-    do i = 2, nx-1
-      do j = 2 , ny-1
-        T(i,j) = 0.25*( T(i-1,j) + Told(i+1,j) + T(i,j-1) + Told(i,j+1) )
+  do while (err >= tol)
+    if (m==1) then
+      Told = T
+      do i = 2, nx-1
+        do j = 2 , ny-1
+          T(i,j) = 0.25*( Told(i-1,j) + Told(i+1,j) + Told(i,j-1) + Told(i,j+1) )
+        end do
       end do
-    end do
-    count = count + 1
+      count = count + 1
+      err = maxval(abs(T-Told))
+    else if (m==2) then
+      Told = T
+      do i = 2, nx-1
+        do j = 2 , ny-1
+          T(i,j) = 0.25*( T(i-1,j) + Told(i+1,j) + T(i,j-1) + Told(i,j+1) )
+        end do
+      end do
+      count = count + 1
+      err = maxval(abs(T-Told))
+      !print *, 'err', err
+    else
+      w = 1.81
+      Told = T
+      do i = 2, nx-1
+        do j = 2 , ny-1
+          T(i,j) = (1-w)*Told(i,j) + w*0.25*(T(i-1,j) + Told(i+1,j) &
+                                 & +         T(i,j-1) + Told(i,j+1))
+        end do
+      end do
+      count = count + 1
+      err = maxval(abs(T-Told))
+    end if
   end do
   call CPU_TIME(t2)
   diff = t1-t2
-  print *, "count =", count
-  print *, 'Gauss-Seidel method took', diff,'seconds.'
+  print *, "Number of loops:", count
+  if (m==1) then
+    print *, 'Jacobi method took', diff,'seconds.'
+  else if (m==2) then
+    print *, 'Gauss-Seidel method took', diff,'seconds.'
+  else
+    print *, 'SOR method took', diff,'seconds.'
+  end if
+  print *, 'Calculation error:', err
 
   ! Formatting for CSV
   101 format(1x, *(g0, ", "))
@@ -72,20 +108,6 @@ program fem2Dheat
   CLOSE(10)
 end program fem2Dheat
 
-!real(4) function Gauss_Seidel(T,nx,ny)
-!  implicit none
-!  integer(4) :: i, j, nx ,ny
-!  real(4), dimension(nx,ny) :: T, Told
-!  real, dimension(:), allocatable :: err
+subroutine w_param
 
-!  Told = T
-
-!  do i = 2, nx-1
-!    do j = 2 , ny-1
-!      T(i,j) = 0.25*( T(i-1,j) + Told(i+1,j) + T(i,j-1) + Told(i,j+1) )
-!    end do
-!  end do
-
-!  err = max(abs(T-Told))
-
-!end function
+end subroutine w_param
