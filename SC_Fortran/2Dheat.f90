@@ -44,7 +44,7 @@ program fem2Dheat
   print *, '[1] Jacobi method'
   print *, '[2] Gauss-Seidel method'
   print *, '[3] SOR method'
-	read *, m
+  read *, m
 
 ! The temperature values along the plane
 ! Solved by Gauss-Seidel method
@@ -107,7 +107,3 @@ program fem2Dheat
   ! Close connection
   CLOSE(10)
 end program fem2Dheat
-
-subroutine w_param
-
-end subroutine w_param
