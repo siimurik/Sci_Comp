@@ -72,7 +72,7 @@ int main(void){
   scanf("%d", &num);
 
 // The temperature values along the plane
-// Solved by Gauss-Seidel method
+// Solved by either three different methods
   start = clock();
   while (err >= tol){
   //for(k = 0; k < 1018; k++){
