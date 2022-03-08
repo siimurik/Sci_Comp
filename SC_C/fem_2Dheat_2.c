@@ -166,14 +166,13 @@ int main(void){
         }
       }
     }
-
+  end = clock();
 
   printf("err = %f\n", err);
   printf("count = %d\n", count);
   char str[6] = "temps";
   create_marks_csv(str,Te,SIZE,SIZE);
 
-  end = clock();
   cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
   printf("\n\nChosen method took %f seconds.\n", cpu_time_used);
   return 0;
