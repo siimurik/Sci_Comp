@@ -85,6 +85,7 @@ int main(void){
         for(i = 1; i < nx-1; i++){
           for(j = 1; j < ny-1; j++){
             Te[i][j] = 0.25*( Told[i-1][j] + Told[i+1][j] + Told[i][j-1] + Told[i][j+1] );
+            }
         }
         count = count + 1;
         //printf("%d\n", count);
@@ -104,8 +105,7 @@ int main(void){
             }
           }
         }
-      }
-    } else if (num == 2){
+      } else if (num == 2){
       for(i = 0; i < nx; i++){
         for(j = 0; j < ny; j++){
           Told[i][j] = Te[i][j];
