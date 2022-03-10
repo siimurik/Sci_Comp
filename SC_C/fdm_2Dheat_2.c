@@ -1,9 +1,8 @@
 #include <stdio.h>
-#include <conio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#define SIZE 31
+#define SIZE 61
 
 void matrix_csv(char *filename,double a[][SIZE],int n,int m){
 printf("\n Creating %s.csv file for matrix.",filename);
@@ -13,7 +12,7 @@ filename=strcat(filename,".csv");
 fp=fopen(filename,"w+");
 for(i = 0; i < m; i++){
     for(j = 0; j < n; j++){
-        fprintf(fp,",%f ",a[i][j]);
+        fprintf(fp,"%10.14f, ",a[i][j]);
       }
       fprintf(fp, "\n");
     }
@@ -60,7 +59,7 @@ int main(void){
     y[i] = 0.0 + (i-1.0)*hy;
     //printf("%f\n", y[i]);
   }
-  tol   = 1e-4;
+  tol   = 1e-12;
   err   = 1.0;
   count = 0;
   //printf("%f\n", x[5]);
@@ -188,7 +187,7 @@ int main(void){
     }
   end = clock();
 
-  printf("err = %f\n", err);
+  printf("err = %E\n", err);
   printf("count = %d\n", count);
   char str[6] = "temps";
   matrix_csv(str,Te,SIZE,SIZE);
