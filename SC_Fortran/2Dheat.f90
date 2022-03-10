@@ -1,4 +1,4 @@
-program fem2Dheat
+program fdm2Dheat
   implicit none
   integer(8), parameter         :: NDIM = 31
   integer(8)                    :: i, j, m, nx, ny, count
@@ -37,7 +37,7 @@ program fem2Dheat
     T(1,  i) = 500.0  ! Up
     T(nx, i) = 500.0  ! Down
     T(i,  1) = 300.0  ! Left
-    T(i, nx) = 300.0  ! R
+    T(i, nx) = 300.0  ! Right
   end do
 
 ! Let user choose the method for solving
@@ -85,7 +85,7 @@ program fem2Dheat
   end do
   ! Close connection
   CLOSE(10)
-end program fem2Dheat
+end program fdm2Dheat
 
 ! Subroutine for the Jacobi method
 ! Takes the most amount of loops
