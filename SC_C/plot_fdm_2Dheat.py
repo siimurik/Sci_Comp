@@ -3,11 +3,12 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-data = pd.read_csv("Temp_data.csv",header = None)
+data = pd.read_csv("temps.csv",header = None)
 xydf = pd.read_csv("xy.csv", header = None)
 #print('\nAlgandmed\n',data.head())
 origin = 'lower'
-T = data.drop(data.columns[[0]], axis=1)
+dim = len(data)
+T = data.drop(data.columns[[dim]], axis=1)
 #print('\nAlgandmed\n',T.head())
 x_feat = xydf.drop(data.columns[[1]], axis=1)
 y_feat = xydf.drop(data.columns[[0]], axis=1)
