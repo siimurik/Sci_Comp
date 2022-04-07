@@ -1,16 +1,16 @@
 program fdm2Dheat_unsteady
   implicit none
-  integer(8), parameter         :: NDIM = 31
-  real(8), parameter            :: LX = 1.0, LY = 1.0, HX = LX/(FLOAT(NDIM)-1), HY = LY/(FLOAT(NDIM)-1), T_END = 0.35, T_START = 0.0
-  real(8), parameter            :: ALPHA = 1.4, DT_EXP = HX**2.0/(4.0*ALPHA), DT_IMP = 0.01
-  integer(8),parameter          :: NT_EXP = (T_END-T_START)/DT_EXP + 2, NT_IMP = (T_END-T_START)/DT_IMP + 1
-  integer(8)                    :: i, j, k, m, nx, ny, nt, count, num, in_x, in_y
+  integer(8), parameter         :: NDIM = 61
+  real(8), parameter            :: LX = 1.0D0, LY = 1.0D0, HX = LX/(FLOAT(NDIM)-1.D0)
+  real(8), parameter            :: HY = LY/(FLOAT(NDIM)-1.D0), T_END = 0.35D0, T_START = 0.0D0
+  real(8), parameter            :: ALPHA = 1.4D0, DT_EXP = HX**2.D0/(4.D0*ALPHA), DT_IMP = 0.01D0
+  integer(8),parameter          :: NT_EXP = (T_END-T_START)/DT_EXP+1.D0, NT_IMP = (T_END-T_START)/DT_IMP+1.D0
+  integer(8)                    :: i, j, k, m, nx, ny, count, num, in_x, in_y
   real(8)                       :: tol, err, w
-  real(8)                       :: dT, K1, delt
+  real(8)                       :: dT, K1
   real(8), dimension(NDIM)      :: x, y
   real(8), dimension(NT_EXP)    :: t_exp, Tmid_exp
   real(8), dimension(NT_IMP)    :: t_imp, Tmid_imp
-!  real(8), allocatable          :: t_exp(:), Tmid_exp(:)
   real(8), dimension(NDIM,NDIM) :: T, Told, T_prev_dt
   REAL(8)                       :: t1, t2, diff
 
@@ -18,23 +18,18 @@ program fdm2Dheat_unsteady
 ! Defining the domain and convergence criteria
   nx = NDIM
   ny = nx
-!  hx = Lx/(nx-1)
-!  hy = Ly/(ny-1)
 ! Additional parameters
   tol = 1e-4
   err = 1.0
   count = 0
-!  t_start = 0.0
-!  t_end = 0.35
-!  alpha = 1.4
   in_x = nx/2
   in_y = ny/2
 ! Defing the length of x and y vectors
 ! The size of the gridmap
   open(unit=9,file='x_y_unsteady.csv')
   do i = 1, nx
-    x(i) = 0. + (i-1)*hx
-    y(i) = 0. + (i-1)*hy
+    x(i) = 0.0 + (i-1.0D0)*hx
+    y(i) = 0.0 + (i-1.0D0)*hy
   end do
 ! Printing in a separate file x_y.csv
   do i = 1, nx
@@ -57,15 +52,12 @@ program fdm2Dheat_unsteady
   read *, num
 
 ! The temperature values along the plane
-! Solved by Gauss-Seidel method
-
+! Solved by either Explicit or Implicit
   if (num == 1) then
     ! Explicit scheme
-!    delt = hx**2.0/(4.0*alpha)
     do i = 1, NT_EXP
-      t_exp(i) = t_start + (i-1.0)*DT_EXP
+      t_exp(i) = t_start + (i-1.0D0)*DT_EXP
     end do
-!    nt = SIZE(t_exp)
     K1 = ALPHA*DT_EXP/(HX**2)
     print *, K1
     call CPU_TIME(t1)
@@ -97,7 +89,6 @@ program fdm2Dheat_unsteady
       t_imp(i) = t_start + (i-1)*DT_IMP
       !print *, tt(i)
     end do
-    !print *, "nt =", nt
     K1 = ALPHA*DT_IMP/(HX**2)
     !print *, "K1 = ", K1
     call CPU_TIME(t1)
@@ -193,7 +184,7 @@ end subroutine Jacobi_implicit
 ! Takes the intermediate amount of loops
 subroutine Gauss_Seidel_implicit(T,T_prev_dt,nx,ny,K1,err)
   implicit None
-  integer(8)                :: i, j, count, nx, ny
+  integer(8)                :: i, j, nx, ny
   real(8)                   :: err, K1, dT
   real(8), dimension(nx,nx) :: T, Told, T_prev_dt
 ! Start of initial variables and calculations
@@ -211,7 +202,7 @@ end subroutine Gauss_Seidel_implicit
 ! Takes the least amount of loops
 subroutine SOR_implicit(T,T_prev_dt,nx,ny,K1,err,w)
   implicit None
-  integer(8)                :: i, j, count, nx, ny
+  integer(8)                :: i, j, nx, ny
   real(8)                   :: w, err, K1, dT
   real(8), dimension(nx,nx) :: T, Told, T_prev_dt
 ! Start of initial variables and calculations
