@@ -1,0 +1,155 @@
+############################################################################
+                The Lennard-Jones fluid instructions guide
+############################################################################
+
+----------------------------------------------------------------------------------
+Step 1: Download the GSL (GNU Scientific Library)
+
+A link to guide you: https://coral.ise.lehigh.edu/jild13/2016/07/11/hello/
+Download the newest one so GSL 2.7 so make sure to start with
+    
+    > wget ftp://ftp.gnu.org/gnu/gsl/gsl-2.7.tar.gz
+
+NB!!! If you don't specify, YOU WILL DOWNLOAD EVERY POSSIBLE VERSION!
+
+Now if you get to the part where you need to test the GSL with an example
+it might give you an error along the lines:
+
+    > "libgsl.so.25: cannot open shared object file: No such file or directory"
+
+Here is a quick fix: https://www.ramanean.com/solved-libgsl-so-25-cannot-open-shared-object-file-no-such-fle-or-directory/
+NB! Make sure to write your home folder name under "home/yourname". If you don't know it, just write 
+
+    > pwd
+
+For me:
+
+    > /home/siimurik
+
+Example should give an output like:
+
+    > J0(15) = -1.422447282678078288e-02
+
+If it printed, congratz! You have successfully installed the GSL.
+
+----------------------------------------------------------------------------------
+Step 2: Running the mdlj.c code
+
+Download from this link: https://www.pages.drexel.edu/~cfa22/msim/node27.html
+
+Before doing any calculations, I recommend to make a separate folder 
+where you can place the mdlj.c file.
+
+    > mkdir newFolder # mkdir makes a new directory named newFolder
+    > mv mdlj.c newFolder # mv for moving the file into the new folder
+
+How to get the mdlj.c code to do stuff!
+Again, change 'yourname' for your folder name!!!
+
+        (use if necessary) > export LD_LIBRARY_PATH="/home/yourname/gsl/lib"
+        > gcc -Wall -I/home/yourname/gsl/include -c mdlj.c
+        > gcc -L/home/yourname/gsl/lib mdlj.o -lgsl -lgslcblas -lm
+
+Some warning may appear saying that variables are unused,
+but we shall use them right away.
+Help on the available functions:
+
+        > ./a.out -h
+
+Let us run mdlj.c for 512 particles and 1000 time-steps at
+a density of 0.85 and an initial temperature of 2.5.
+Let's save it into a file 'mdlj_calc.txt'
+
+        > ./a.out -N 512 -fs 10 -ns 1000 -sf w -T0 2.5 -rho 0.85 -rc 2.5 > mdlj_calc.txt
+
+The 100 'snapshot' files are now present in the folder as well.
+(Optional) If they are clogging the space, I recommend to move them into
+a different folder with these commands
+
+    > mkdir newFolderResult
+    > mv *.xyz newFolderResult
+
+But again, this step is optional.
+
+----------------------------------------------------------------------------------
+Step 3: Visualization 
+
+Option 1: VMD 
+VMD is a nice piece of software to visualize different sorts of molecules.
+
+To download, register an account using TalTech user credentials for this website
+Link: https://www.ks.uiuc.edu/Development/Download/download.cgi?PackageName=VMD
+
+Use 'wget' to download (Example)
+
+    > wget https://www.ks.uiuc.edu/Research/vmd/vmd-1.9.4/files/alpha/vmd-1.9.4a57.bin.LINUXAMD64-CUDA102-OptiX650-OSPRay185.opengl.tar.gz
+
+How to set it up
+Link (Video):   https://youtu.be/7YA7IyxrxKw
+Link (Article): https://bioinformaticsreview.com/20220301/how-to-install-vmd-on-ubuntu/
+
+Enjoy!
+
+Option 2: Python code
+For the python code I picked out the initial state 0.xyz and a random state 650.xyz
+and visualized them using a python code. If you want to make your own code,
+a great suggestion is to make a Jupyter Notebook file and work with that.
+
+You can look at different shapshots by changing out the '650.xyz' file on the line
+
+    $ data650 = pd.read_table('650.xyz', ...
+
+Make sure that the python file and the .xyz files are in the same folder
+along with the energy results, that are stored in the file 'mdlj_calc.txt'
+
+The Python Code:
+
+# A code to visualize the results of the mdlj.c code
+# Author: S. E. Pugal
+# Date: 28.04.22
+
+import pandas as pd
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import axes3d
+
+#Reading in the general results about PE, KE, Te...
+df_out = pd.read_table('mdlj_calc.txt', skiprows=4, delim_whitespace=True,
+                         names=['step', 'PE', 'KE', 'TE', 'drift', 'T', 'P'])
+#print(df_out.head())	# to see PE, KE, Te...
+
+# Plotting PE, KE, Te
+fig = plt.figure()
+
+ax = fig.add_subplot(211)
+ax.plot(df_out['step'], df_out['PE'], color='red',     label="Potential energy")
+ax.plot(df_out['step'], df_out['KE'], color='blue',    label="Kinetic energy")
+ax.plot(df_out['step'], df_out['TE'], color='magenta', label="Energies as functions of time")
+ax.set_xlabel('Time')
+ax.set_ylabel('Energy')
+plt.grid()
+plt.legend()
+
+# Plotting Enegry drift
+ax = fig.add_subplot(212)
+ax.plot(df_out['step'], df_out['drift'], color='red',  label="Energy drift")
+ax.set_xlabel('Time')
+ax.set_ylabel('Energy drift')
+plt.grid()
+
+# Plotting the atomic structure at first "snapshot" 0.xyz
+data0 = pd.read_table('0.xyz', skiprows=2, delim_whitespace=True,
+                         names=['x', 'y', 'z', 'nx', 'ny','nz'])
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(data0['x'], data0['y'], data0['z'], color='orange')
+plt.title("Snapshot t = 0 ms")
+
+# Plotting the atomic structure at random "snapshot" 650.xyz
+data650 = pd.read_table('650.xyz', skiprows=2, delim_whitespace=True,
+                         names=['x', 'y', 'z', 'nx', 'ny','nz'])
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(data650['x'], data650['y'], data650['z'], color='orange')
+plt.title("Snapshot t = 650 ms")
+plt.show()
