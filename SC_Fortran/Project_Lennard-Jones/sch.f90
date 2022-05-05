@@ -44,7 +44,7 @@ program schroedinger_equation_1D
   !----------Input:
   print *, '# Enter energy, de, xmin, xmax, Nx'
   print *, '# For schInfSq try:     1 0.5 -1  1 2000'
-  print *, '# For schLJ    try:     1 0.5 0.7 4 2000 '
+  print *, '# For schLJ    try:  -71. 0.1 0.7 6 2000 '
   read  *, energy, de, xmin, xmax, Nx
   !---needevenintervalsfornormalizationintegration
   if( mod(Nx,2).eq.0)Nx=Nx+1
