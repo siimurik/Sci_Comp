@@ -1,3 +1,12 @@
+/*
+  Program for 2-D steady heat conduction equation using
+  Finite Difference Method
+
+  This solution uses the Jacobi method
+
+  Author: Siim Erik Pugal
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -12,13 +21,13 @@ void transfer(char *filename, double a[][NDIM], int n, int m){
   fp = fopen(filename,"w+");
   for(i = 0; i < n; i++){  // for ROWS
     for(j = 0; j < m; j++){  // for COLUMNS
-      fprintf(fp,",%f", a[i][j]);
+      fprintf(fp,",%.15lf", a[i][j]);
       //printf("%f\n", Temp[0][j]);
     }
     fprintf(fp, "\n");
   }
   fclose(fp);
-  printf("\n %s file has been created.", filename);
+  printf("\n %s file has been created.\n\n", filename);
 }
 
 int main(void){
@@ -28,6 +37,10 @@ int main(void){
   static double Temp[NDIM][NDIM], Tprev[NDIM][NDIM], matdiff[NDIM][NDIM];
   clock_t start, end;
   double time_diff;
+
+  printf(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n");
+  printf("                        FDM using Jacobi method\n");
+  printf(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n");
 
 // Defining the domain and convergence criteria
   Lx = 6.0;
@@ -92,11 +105,11 @@ int main(void){
   }
   end = clock();
   time_diff = ((double)(end-start)) / CLOCKS_PER_SEC;
-  printf("err = %f\n", err);
+  printf("err = %e\n", err);
   printf("count = %d\n", count);
-  printf("Time of calculations = %f seconds.\n", time_diff);
+  printf("Time of calculations = %lf seconds.\n", time_diff);
 
-  char str[10] = "Temp_data";
+  char str[20] = "Temp_data";
   transfer(str, Temp, NDIM, NDIM);
   return 0;
 }
