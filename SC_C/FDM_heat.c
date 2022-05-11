@@ -39,7 +39,7 @@ int main(void){
   double time_diff;
 
   printf(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n");
-  printf("                        FDM using Jacobi method\n");
+  printf(";                     FDM using Jacobi method                   ;\n");
   printf(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n");
 
 // Defining the domain and convergence criteria
@@ -55,7 +55,7 @@ int main(void){
     y[i] = 0.0 + (i-1.0)*hy;
     //printf("%f\n", y[i]);
   }
-  tol = 1e-4;
+  tol = 1e-6;
   err = 1.0;
   count = 0;
 
