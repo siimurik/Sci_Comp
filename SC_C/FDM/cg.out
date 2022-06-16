@@ -1,0 +1,22 @@
+==311410== Cachegrind, a cache and branch-prediction profiler
+==311410== Copyright (C) 2002-2017, and GNU GPL'd, by Nicholas Nethercote et al.
+==311410== Using Valgrind-3.15.0 and LibVEX; rerun with -h for copyright info
+==311410== Command: ./fdm
+==311410== Parent PID: 310476
+==311410== 
+==311410== 
+==311410== I   refs:      781,095,529
+==311410== I1  misses:         49,867
+==311410== LLi misses:          1,543
+==311410== I1  miss rate:        0.01%
+==311410== LLi miss rate:        0.00%
+==311410== 
+==311410== D   refs:      219,045,834  (204,025,971 rd   + 15,019,863 wr)
+==311410== D1  misses:      4,051,176  (  2,547,521 rd   +  1,503,655 wr)
+==311410== LLd misses:          4,280  (      2,161 rd   +      2,119 wr)
+==311410== D1  miss rate:         1.8% (        1.2%     +       10.0%  )
+==311410== LLd miss rate:         0.0% (        0.0%     +        0.0%  )
+==311410== 
+==311410== LL refs:         4,101,043  (  2,597,388 rd   +  1,503,655 wr)
+==311410== LL misses:           5,823  (      3,704 rd   +      2,119 wr)
+==311410== LL miss rate:          0.0% (        0.0%     +        0.0%  )

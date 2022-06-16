@@ -1,0 +1,319 @@
+================================================================================
+Profile the Matrix-Matrix multiplication and try different ordering of the loops.
+================================================================================
+--------------------------------------------------------------------------------
+What difference do you notice?
+--------------------------------------------------------------------------------
+Starting with original code of 1000x1000 multiplication:
+(Version 1)
+  for(i = 0; i < SIZE; i++){
+    for(j = 0; j < SIZE; j++){
+      matC[i][j]=0;
+      for(k = 0; k < SIZE; k++){
+        matC[i][j] += matA[i][k] * matB[k][j];
+      }
+    }
+  }
+
+  $ gcc dyn_matmul.c -o dyn
+  $ ./dyn
+  Matrix multiplication took 30.405 seconds.
+--------------------------------------------------------------------------------
+An interesting observation was made when a different order was tried
+in the matrix multiplication part.
+
+New one looks like this:
+(Version 2)
+for(j = 0; j < SIZE; j++){
+  for(i = 0; i < SIZE; i++){
+    matC[i][j]=0;
+    for(k = 0; k < SIZE; k++){
+      matC[i][j] += matA[i][k] * matB[k][j];
+    }
+  }
+}
+
+Running the calculations now gave the following result:
+
+  $ gcc dyn_matmul.c -o dyn
+  $ ./dyn
+  Matrix multiplication took 23.497 seconds.
+
+That is about 6.908 seconds faster than the original code.
+--------------------------------------------------------------------------------
+Changing the order even more gave these results
+(Version 3)
+for(k = 0; k < SIZE; k++){
+  for(i = 0; i < SIZE; i++){
+    matC[i][j]=0;
+    for(j = 0; j < SIZE; j++){
+      matC[i][j] += matA[i][k] * matB[k][j];
+    }
+  }
+}
+
+  $ gcc dyn_matmul.c -o dyn
+  $ ./dyn
+  Matrix multiplication took 12.513 seconds.
+
+  This is about 17.892 seconds faster than the Version 1 code.
+--------------------------------------------------------------------------------
+  Even faster version using matrix transposing
+  (Version 4)
+  for (i=0;i<SIZE;i++) //transposing matrix
+  {
+    for(j=0; j<i; j++)
+    { s = matB[i][j]; matB[i][j] = matB[j][i]; matB[j][i] = s; }
+  }
+  for (j=0;j<SIZE;j++) //multiplication
+  {
+    for(i=0; i<SIZE; i++)
+    {
+      s=0;
+      for(k=0; k<SIZE; k++)
+      {
+        s += matA[i][k] * matB[j][k]; //using transposed matrix B
+      }
+      matC[i][j] = s;
+    }
+  }
+
+  $ gcc dyn_matmul.c -o dyn
+  $ ./dyn
+  Matrix multiplication took 7.153 seconds.
+
+  which is over 20 seconds faster than Version 1
+  (23.252 seconds to be exact).
+
+--------------------------------------------------------------------------------
+ Fastest version with GSL (with a slightly modified code)
+ $ gcc -Wall -I/usr/local/include -c gsl_matmul.c
+ $ gcc -L/usr/local/lib gsl_matmul.o -lgsl -lgslcblas -lm
+ $ ./a.out
+ time = 3.258274 sec.
+
+ Nearly 27 seconds faster than the original code.
+
+--------------------------------------------------------------------------------
+Try different compiler optimization levels. Do they make a difference?
+--------------------------------------------------------------------------------
+  Summary:
+  No, it doesn't make a difference.
+--------------------------------------------------------------------------------
+  (The following examples are done on the code 'dyn_matmul.c')
+
+  Doing matix multiplication with a 500x500 with '-o' one gives a time
+    Matrix multiplication took 2.676 seconds.
+
+  Doing matix multiplication with a 500x500 with '-o2' one gives a time
+    Matrix multiplication took 2.682 seconds.
+
+  Doing matix multiplication with a 500x500 with '-o3' one gives a time
+    Matrix multiplication took 2.664 seconds.
+
+  Doing matix multiplication with a 500x500 with '-o4' one gives a time
+    Matrix multiplication took 2.613 seconds.
+
+  Doing matix multiplication with a 500x500 with '-o5' one gives a time
+    Matrix multiplication took 2.674 seconds.
+
+--------------------------------------------------------------------------------
+  Conclusion:
+    It is hard to see a significant difference here. Even repetedly running the
+    code with different dimensions and just the first order can give only small
+    variations depending on the load the computer is currently under. Most of
+    them were in the same timerange so the was no real noticable difference.
+
+================================================================================
+Profile the FDM heat conduction program using Valgrind-cachegrind and Valgrind-callgrind.
+================================================================================
+--------------------------------------------------------------------------------
+                            Summary of the results:
+
+Testing was done with the code 'fdm_2Dheat_Pugal.c'.
+
+Overall, there were no serious memory leakage cases. No notable branch-
+prediction misses, because the code is quite deterministic in its nature. Meaning
+the user chooses which method to use, not some random part of the code.
+
+Looking specifically at cache miss-rates, that were mainly present for I1 and D1,
+were quite small and other miss rates negligible.
+
+Looking at bottlenecks, I guess the code have been segmentated in a better way.
+Curently the main part of the code does all of the computations, but the parts
+that do the computations could have been segmented into separate functions
+or subroutines, so as not to do them in the main branch of the code.
+
+The results of the valgrind commands are presented below/
+--------------------------------------------------------------------------------
+
+  Valgrind printed a following report of the the fdm_2Dheat_Pugal.c code:
+  $ valgrind ./fdm
+==311347== Memcheck, a memory error detector
+==311347== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==311347== Using Valgrind-3.15.0 and LibVEX; rerun with -h for copyright info
+==311347== Command: ./fdm
+==311347==
+Input the method of approximation:
+[1] Jacobi method
+[2] Gauss-Seidel method
+[3] Successive Over-Relaxation method
+3
+err = 9.663381E-13
+count = 1099
+
+ Creating temps.csv file for matrix.
+ temps.csv file created.
+ Creating vector xy.csv file for x & y.
+ Vector xy.csv file created.
+
+Chosen method took 2.587767 seconds.
+==311347==
+==311347== HEAP SUMMARY:
+==311347==     in use at exit: 0 bytes in 0 blocks
+==311347==   total heap usage: 6 allocs, 6 frees, 11,184 bytes allocated
+==311347==
+==311347== All heap blocks were freed -- no leaks are possible
+==311347==
+==311347== For lists of detected and suppressed errors, rerun with: -s
+==311347== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+
+--------------------------------------------------------------------------------
+  Report from chachegrind gave a message:
+
+  $ valgrind --tool=cachegrind  --log-file=cg.out ./fdm
+  Input the method of approximation:
+  [1] Jacobi method
+  [2] Gauss-Seidel method
+  [3] Successive Over-Relaxation method
+  3
+  err = 9.663381E-13
+  count = 1099
+
+   Creating temps.csv file for matrix.
+   temps.csv file created.
+   Creating vector xy.csv file for x & y.
+   Vector xy.csv file created.
+
+  Chosen method took 6.438077 seconds.
+
+(Results from cg.out logfile)
+==311410== Cachegrind, a cache and branch-prediction profiler
+==311410== Copyright (C) 2002-2017, and GNU GPL'd, by Nicholas Nethercote et al.
+==311410== Using Valgrind-3.15.0 and LibVEX; rerun with -h for copyright info
+==311410== Command: ./fdm
+==311410== Parent PID: 310476
+==311410==
+==311410==
+==311410== I   refs:      781,095,529
+==311410== I1  misses:         49,867
+==311410== LLi misses:          1,543
+==311410== I1  miss rate:        0.01%
+==311410== LLi miss rate:        0.00%
+==311410==
+==311410== D   refs:      219,045,834  (204,025,971 rd   + 15,019,863 wr)
+==311410== D1  misses:      4,051,176  (  2,547,521 rd   +  1,503,655 wr)
+==311410== LLd misses:          4,280  (      2,161 rd   +      2,119 wr)
+==311410== D1  miss rate:         1.8% (        1.2%     +       10.0%  )
+==311410== LLd miss rate:         0.0% (        0.0%     +        0.0%  )
+==311410==
+==311410== LL refs:         4,101,043  (  2,597,388 rd   +  1,503,655 wr)
+==311410== LL misses:           5,823  (      3,704 rd   +      2,119 wr)
+==311410== LL miss rate:          0.0% (        0.0%     +        0.0%  )
+
+--------------------------------------------------------------------------------
+  Report from chachegrind gave a message:
+
+  $ valgrind --tool=callgrind  --log-file=callgrind.log ./fdm
+  Input the method of approximation:
+  [1] Jacobi method
+  [2] Gauss-Seidel method
+  [3] Successive Over-Relaxation method
+  3
+  err = 9.663381E-13
+  count = 1099
+
+   Creating temps.csv file for matrix.
+   temps.csv file created.
+   Creating vector xy.csv file for x & y.
+   Vector xy.csv file created.
+
+  Chosen method took 1.973401 seconds.
+
+(Results from callgrind.log file)
+==311673== Callgrind, a call-graph generating cache profiler
+==311673== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==311673== Using Valgrind-3.15.0 and LibVEX; rerun with -h for copyright info
+==311673== Command: ./fdm
+==311673== Parent PID: 310476
+==311673==
+==311673== For interactive control, run 'callgrind_control -h'.
+==311673==
+==311673== Events    : Ir
+==311673== Collected : 781095526
+==311673==
+==311673== I   refs:      781,095,526
+
+--------------------------------------------------------------------------------
+$ cg_annotate cachegrind.out.311410
+--------------------------------------------------------------------------------
+I1 cache:         32768 B, 64 B, 2-way associative
+D1 cache:         32768 B, 64 B, 8-way associative
+LL cache:         2097152 B, 64 B, 16-way associative
+Command:          ./fdm
+Data file:        cachegrind.out.311410
+Events recorded:  Ir I1mr ILmr Dr D1mr DLmr Dw D1mw DLmw
+Events shown:     Ir I1mr ILmr Dr D1mr DLmr Dw D1mw DLmw
+Event sort order: Ir I1mr ILmr Dr D1mr DLmr Dw D1mw DLmw
+Thresholds:       0.1 100 100 100 100 100 100 100 100
+Include dirs:
+User annotated:
+Auto-annotation:  off
+
+--------------------------------------------------------------------------------
+Ir          I1mr   ILmr  Dr          D1mr      DLmr  Dw         D1mw      DLmw
+--------------------------------------------------------------------------------
+781,095,529 49,867 1,543 204,025,971 2,547,521 2,161 15,019,863 1,503,655 2,119  PROGRAM TOTALS
+
+--------------------------------------------------------------------------------
+Ir          I1mr   ILmr Dr          D1mr      DLmr Dw         D1mw      DLmw   file:function
+--------------------------------------------------------------------------------
+764,355,891     33   33 200,078,367 2,544,190    2 12,472,144 1,502,819 1,413  ???:main
+  5,028,105 11,118  101     940,059        12   10    598,023        56    51  /build/glibc-sMfBJT/glibc-2.31/stdio-common/printf_fp.c:__printf_fp_l
+  3,438,756      6    6   1,189,306         0    0    519,821         0     0  /build/glibc-sMfBJT/glibc-2.31/stdio-common/printf_fp.c:hack_digit
+  3,061,136  3,729    6     792,229         0    0    726,993         2     0  /build/glibc-sMfBJT/glibc-2.31/stdlib/divrem.c:__mpn_divrem
+  1,459,452  3,792    4     205,816         0    0    138,460         0     0  /build/glibc-sMfBJT/glibc-2.31/stdlib/../sysdeps/x86_64/mul_1.S:__mpn_mul_1
+  1,137,902  3,874   60     289,410        32    8    210,079        15     1  /build/glibc-sMfBJT/glibc-2.31/stdio-common/vfprintf-internal.c:__vfprintf_internal
+
+
+--------------------------------------------------------------------------------
+  $ callgrind_annotate  callgrind.out.311673
+  --------------------------------------------------------------------------------
+  Profile data file 'callgrind.out.311673' (creator: callgrind-3.15.0)
+  --------------------------------------------------------------------------------
+  I1 cache:
+  D1 cache:
+  LL cache:
+  Timerange: Basic block 0 - 28231635
+  Trigger: Program termination
+  Profiled target:  ./fdm (PID 311673, part 1)
+  Events recorded:  Ir
+  Events shown:     Ir
+  Event sort order: Ir
+  Thresholds:       99
+  Include dirs:
+  User annotated:
+  Auto-annotation:  off
+
+  --------------------------------------------------------------------------------
+  Ir
+  --------------------------------------------------------------------------------
+  781,095,526  PROGRAM TOTALS
+
+  --------------------------------------------------------------------------------
+  Ir           file:function
+  --------------------------------------------------------------------------------
+  764,355,891  ???:main [/home/siim/Documents/Magister/Sci_Comp/SC_C/FDM/fdm]
+    5,028,105  /build/glibc-sMfBJT/glibc-2.31/stdio-common/printf_fp.c:__printf_fp_l [/usr/lib/x86_64-linux-gnu/libc-2.31.so]
+    3,438,756  /build/glibc-sMfBJT/glibc-2.31/stdio-common/printf_fp.c:hack_digit [/usr/lib/x86_64-linux-gnu/libc-2.31.so]
+    3,061,136  /build/glibc-sMfBJT/glibc-2.31/stdlib/divrem.c:__mpn_divrem [/usr/lib/x86_64-linux-gnu/libc-2.31.so]

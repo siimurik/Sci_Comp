@@ -1,0 +1,12 @@
+==311673== Callgrind, a call-graph generating cache profiler
+==311673== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==311673== Using Valgrind-3.15.0 and LibVEX; rerun with -h for copyright info
+==311673== Command: ./fdm
+==311673== Parent PID: 310476
+==311673== 
+==311673== For interactive control, run 'callgrind_control -h'.
+==311673== 
+==311673== Events    : Ir
+==311673== Collected : 781095526
+==311673== 
+==311673== I   refs:      781,095,526
