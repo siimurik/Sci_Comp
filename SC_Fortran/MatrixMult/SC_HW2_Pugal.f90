@@ -14,7 +14,7 @@ implicit none
   CALL CPU_TIME(t2)
   diff = t2-t1
   !WRITE ( 10, * ) c100
-  print *, "The 100x100 matrix multiplication clocked in at:", diff
+  print *, "The 100 x 100 matrix multiplication clocked in at:", diff
 
   !OPEN(unit=11, file='mat_mult_1000x1000.dat')
   CALL RANDOM_NUMBER(matA_1000)
