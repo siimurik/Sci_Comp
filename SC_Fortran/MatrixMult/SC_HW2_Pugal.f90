@@ -6,34 +6,34 @@ implicit none
   REAL(8), DIMENSION(5000, 5000) :: matA_5000, matB_5000,c5000
   REAL(8) :: t1, t2, diff
 
-  OPEN(unit=10, file='mat_mult_100x100.dat')
+  !OPEN(unit=10, file='mat_mult_100x100.dat')
   CALL RANDOM_NUMBER(matA_100)
   CALL RANDOM_NUMBER(matB_100)
   CALL CPU_TIME(t1)
   c100 = matmul(matA_100, matB_100)
   CALL CPU_TIME(t2)
   diff = t2-t1
-  WRITE ( 10, * ) c100
+  !WRITE ( 10, * ) c100
   print *, "The 100x100 matrix multiplication clocked in at:", diff
 
-  OPEN(unit=11, file='mat_mult_1000x1000.dat')
+  !OPEN(unit=11, file='mat_mult_1000x1000.dat')
   CALL RANDOM_NUMBER(matA_1000)
   CALL RANDOM_NUMBER(matB_1000)
   CALL CPU_TIME(t1)
   c1000 = matmul(matA_1000, matB_1000)
   CALL CPU_TIME(t2)
   diff = t2-t1
-  WRITE ( 11, * ) c1000
+  !WRITE ( 11, * ) c1000
   print *, "The 1000x1000 matrix multiplication clocked in at:", diff
 
-  OPEN(unit=12, file='mat_mult_5000x5000.dat')
+  !OPEN(unit=12, file='mat_mult_5000x5000.dat')
   CALL RANDOM_NUMBER(matA_5000)
   CALL RANDOM_NUMBER(matB_5000)
   CALL CPU_TIME(t1)
   c5000 = matmul(matA_5000, matB_5000)
   CALL CPU_TIME(t2)
   diff = t2-t1
-  WRITE ( 12, * ) c5000
+  !WRITE ( 12, * ) c5000
   print *, "The 5000x5000 matrix multiplication clocked in at:", diff
 
 end program mat_mat_mult
